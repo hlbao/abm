@@ -1,3 +1,6 @@
+#https://towardsdatascience.com/an-extensible-evolutionary-algorithm-example-in-python-7372c56a557b
+#If you have never used Abstract Base Classes before, don’t worry. The class Individual is only there to tell you which interface you have to use for the objects that represent your individuals. Your individuals need a value (the payload, the potential solution), you have to implement a random initialization, a mutation, and pair function.
+
 import numpy as np
 from abc import ABC, abstractmethod
 
