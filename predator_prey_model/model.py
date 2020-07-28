@@ -55,3 +55,49 @@ class WolfSheep(Model):
         grass_regrowth_time=30,
         sheep_gain_from_food=4,
     ):
+
+        
+        
+        """
+        Create a new Wolf-Sheep model with the given parameters.
+        Args:
+            initial_sheep: Number of sheep to start with
+            initial_wolves: Number of wolves to start with
+            sheep_reproduce: Probability of each sheep reproducing each step
+            wolf_reproduce: Probability of each wolf reproducing each step
+            wolf_gain_from_food: Energy a wolf gains from eating a sheep
+            grass: Whether to have the sheep eat grass for energy
+            grass_regrowth_time: How long it takes for a grass patch to regrow
+                                 once it is eaten
+            sheep_gain_from_food: Energy sheep gain from grass, if enabled.
+        """
+        super().__init__()
+        # Set parameters
+        self.height = height
+        self.width = width
+        self.initial_sheep = initial_sheep
+        self.initial_wolves = initial_wolves
+        self.sheep_reproduce = sheep_reproduce
+        self.wolf_reproduce = wolf_reproduce
+        self.wolf_gain_from_food = wolf_gain_from_food
+        self.grass = grass
+        self.grass_regrowth_time = grass_regrowth_time
+        self.sheep_gain_from_food = sheep_gain_from_food
+
+        self.schedule = RandomActivationByBreed(self)
+        self.grid = MultiGrid(self.height, self.width, torus=True)
+        self.datacollector = DataCollector(
+            {
+                "Wolves": lambda m: m.schedule.get_breed_count(Wolf),
+                "Sheep": lambda m: m.schedule.get_breed_count(Sheep),
+            }
+        )
+
+        # Create sheep:
+        for i in range(self.initial_sheep):
+            x = self.random.randrange(self.width)
+            y = self.random.randrange(self.height)
+            energy = self.random.randrange(2 * self.sheep_gain_from_food)
+            sheep = Sheep(self.next_id(), (x, y), self, True, energy)
+            self.grid.place_agent(sheep, (x, y))
+            self.schedule.add(sheep)
