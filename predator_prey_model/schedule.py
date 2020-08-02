@@ -52,3 +52,21 @@ class RandomActivationByBreed(RandomActivation):
             self.time += 1
         else:
             super().step()
+            
+           
+    def step_breed(self, breed):
+        """
+        Shuffle order and run all agents of a given breed.
+        Args:
+            breed: Class object of the breed to run.
+        """
+        agent_keys = list(self.agents_by_breed[breed].keys())
+        self.model.random.shuffle(agent_keys)
+        for agent_key in agent_keys:
+            self.agents_by_breed[breed][agent_key].step()
+
+    def get_breed_count(self, breed_class):
+        """
+        Returns the current number of agents of certain breed in the queue.
+        """
+        return len(self.agents_by_breed[breed_class].values())
