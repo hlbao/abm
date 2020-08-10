@@ -51,4 +51,32 @@ class WalkerWorld(Model):
 
     def step(self):
         self.schedule.step()
+        
+        
+        
+ class WalkerWorldViz(TextVisualization):
+    """
+    ASCII Visualization for a WalkerWorld agent.
+    Each cell is displayed as the number of agents currently in that cell.
+    """
+
+    def __init__(self, model):
+        """
+        Create a new visualization for a WalkerWorld instance.
+        args:
+            model: An instance of a WalkerWorld model.
+        """
+        self.model = model
+        grid_viz = TextGrid(self.model.grid, None)
+        grid_viz.converter = lambda x: str(len(x))
+        self.elements = [grid_viz]
+
+
+if __name__ == "__main__":
+    print("Testing 10x10 world, with 50 random walkers, for 10 steps.")
+    model = WalkerWorld(10, 10, 50)
+    viz = WalkerWorldViz(model)
+    for i in range(10):
+        print("Step:", str(i))
+        viz.step()
 
