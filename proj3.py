@@ -1,3 +1,4 @@
+
 import csv
 
 
@@ -135,4 +136,97 @@ for i in range(len(nolist)):
 #[125, 235, 125, 235, 194, 72, 370, 258, 253, 139, 113, 249, 479, 463, 14, 173, 298, 33, 360, 354, 135, 72, 238, 116, 211, 323, 222, 258, 434, 11, 172, 354, 414, 246, 197, 31, 178, 38, 475, 112, 456, 447, 402, 229]
 #print(totalnum)
 #[2, 2, 5, 3, 1, 4, 12, 10, 2, 3]
+#print(date3list)
+#['11/21/2020', '11/25/2020', '11/21/2020', '11/25/2020', '06/29/2019', '07/14/2019', '08/02/2019', '07/07/2019', '06/18/2019', '06/27/2019', '06/19/2019', '07/11/2019', '06/16/2020', '08/09/2019', '07/18/2019', '09/11/2019', '09/03/2019', '11/15/2020', '10/04/2020', '11/09/2020', '10/11/2020', '09/25/2020', '11/16/2020', '10/06/2020', '10/08/2020', '09/28/2020', '11/06/2020', '10/29/2020', '10/16/2020', '11/03/2020', '10/26/2020', '09/13/2020', '09/15/2020', '11/07/2020', '10/15/2020', '10/02/2020', '11/03/2020', '10/18/2020', '09/26/2020', '07/29/2020', '07/30/2020', '10/28/2020', '09/25/2020', '09/27/2020']
+#print(noitem)
+#['LO917', 'IL993', 'LO917', 'IL993', 'AF977', 'L223', 'IL993', 'Y337', 'O261', 'LM485', 'N669', 'P530', 'IL993', 'UN941', 'W555', 'TH851', 'O662', 'Q25', 'IW804', 'UC428', 'YJ195', 'UN941', 'O646', 'K233', 'NG108', 'F603', 'NQ813', 'NO204', 'YC871', 'L223', 'F603', 'TH851', 'TD834', 'N669', 'IW804', 'NQ813', 'W555', 'K733', 'PX218', 'PX218', 'Q25', 'T5333', 'R207', 'TD834']
+#print(finalqty)
+#[125, 235, 125, 235, 194, 72, 370, 258, 253, 139, 113, 249, 479, 463, 14, 173, 298, 33, 360, 354, 135, 72, 238, 116, 211, 323, 222, 258, 434, 11, 172, 354, 414, 246, 197, 31, 178, 38, 475, 112, 456, 447, 402, 229]
+
+    
+#print(finalqty)
+
+def cutlist(a, b):#a is long, b is short
+    newdata3 = a
+    listfinal2=[]
+    for i in range(len(b)):
+        listfinal=[]
+        for j in range(b[i]):
+            x = a.pop(0)
+            listfinal.append(x)
+        listfinal2.append(listfinal)
+    return listfinal2
+
+def buildlist(a):
+  newlist =[]
+  for i in range(len(a)):
+    for j in range(len(a[i])):
+      newlist.append(a[i][j])
+
+  return newlist
+
+
+finalqty1=[]
+finalqty1 =finalqty
+noitem1 = noitem
+date3list1=date3list 
+pricelist1=pricelist
+itemname1 = itemname
+
+list3 =cutlist(finalqty1, totalnum)
+#print(newfinalqty)
+list2 = cutlist(noitem1, totalnum)
+#print(cutlist)
+list5 = cutlist(date3list1, totalnum)
+#print(newdate3list)
+list4 =cutlist(pricelist1, totalnum)
+#print(newpricelist)
+list1 =cutlist(itemname1, totalnum)
+#print(itemnamenew)
+
+finalqty = buildlist(list3)
+#print(finalqty)
+
+pricelist = buildlist(list4)
+
+total2=[]
+for i in range(len(finalqty)):
+    new = finalqty[i]* pricelist[i]
+    total2.append(new)
+
+#print(total2)
+totalordered = []
+total = cutlist(total2, totalnum)
+for i in range(len(total)):
+  sum1 =sum(total[i])
+  totalordered.append(sum1)
+
+#print(totalordered) correct
+
+
+totaldue2 = []
+for i in range(len(totalordered)):
+  totaldue1 = totalordered[i]+ balancelist[i]
+  totaldue2.append(totaldue1)
+
+for i in range(len(totalordered)-1):
+  for j in range(i+1, len(totalordered)):
+    if(numlist[i] == numlist[j] ):
+      totaldue2[j] =totaldue2[j]+totaldue2[i]
+
+print(totaldue2)
+
+#print(totaldue)
+#[26851.3, 26851.3, 80781.55, 34160.43, 54033.62, 0, 172973.88999999998, 149295.63, 29784.550000000003, 49043.380000000005]
+
+
+
+
+
+
+
+
+        
+    
+
 
