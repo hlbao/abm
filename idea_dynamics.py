@@ -97,3 +97,155 @@ def Variance_ideas(idea_list):
             if i != j:
                 dist.append(sqrt(sum([(float(i[d])-float(j[d]))**2 for d in range(dim)])))
     return var(dist)
+
+
+def Probability_accept(node, idea):
+    agent = node['agent']
+    best_utility = max([Individual_utility(node['agent'], i) for i in agent.idea_pool])
+    mid_utility = median([Individual_utility(node['agent'], i) for i in agent.idea_pool])
+    if Individual_utility(node['agent'], idea) > best_utility:
+        return 1.
+    elif Individual_utility(node['agent'], idea) < mid_utility:
+        return 0.
+    else:
+        if mid_utility == best_utility:
+            return 1.
+        else:
+            return (Individual_utility(node['agent'], idea)-mid_utility)/(best_utility-mid_utility)
+
+
+def Visible_ideas(node):  # personal ideas are not included
+    local_ideas = []
+    # get the index of the node
+    index = 0
+    for i in range(len(net.nodes)):
+        if node == net.nodes[i]:
+            index = i
+    for nb in list(net.neighbors(index)):  # neighbors' idea_pool
+        local_ideas = local_ideas + net.nodes[nb]['agent'].idea_pool
+
+    local_iter = [i['iteration'] + 10**-10 for i in local_ideas]
+    local_comment = [len(i['comment']) + 10**-10 for i in local_ideas]
+    local_like = [len(i['like']) + 10**-10 for i in local_ideas]
+
+    p_iter = [(i-min(local_iter))/max(local_iter) for i in local_iter]
+    p_comment = [(i-min(local_comment))/max(local_comment) for i in local_comment]
+    p_like = [(i-min(local_like))/max(local_like) for i in local_like]
+    p = [p_iter[i]+coef_com_like*p_comment[i]+coef_com_like*p_like[i] for i in range(len(p_iter))]
+    if sum(p) == 0:
+        norm_p = [1./len(p)]*len(p)
+    else:
+        norm_p = [i/sum(p) for i in p]
+
+    if len(local_ideas) <= number_visible_idea:
+        return local_ideas
+    else:
+        return list(choice(local_ideas, number_visible_idea, p=norm_p))
+
+
+
+def Like(node, idea):  # need to be testified
+    if node in idea['like']:
+        return
+    elif random() <= Probability_accept(node, idea):
+        idea['like'].append(node)
+        print("like")
+    else:
+        return
+
+
+def Comment(node, idea): # comment here represents the suggestions; complement comments are assumed to be equal to clicking like
+    agent = node['agent']
+    pure_idea = idea['idea']
+    personal_pure_ideas = [i['idea'] for i in agent.idea_pool]
+
+    if node in idea['comment']:
+        return
+    elif random() <= Probability_accept(node, idea):
+        if pure_idea in personal_pure_ideas:  # if the agent has the same idea
+            idea['comment'].append(node)
+        else:
+            new_idea = pure_idea[:]
+            background = agent.background
+            size_background = sum([len(i) for i in background])
+            selected_dim = choice(list(arange(dim)), p=[(len(i)+10**-10)/size_background for i in background])
+            random_item = choice(background[selected_dim])
+            new_idea[selected_dim] = random_item
+            new_idea_dic = {'idea': new_idea}
+            if Individual_utility(agent, new_idea_dic) > Individual_utility(agent, idea):  # if the new idea is better than previous one
+                idea['comment'].append(node)
+            print("comment")
+    else:
+        return
+
+
+def Post_novel_idea(node, iteration):
+    agent = node['agent']
+    background = agent.background
+    potential_new_ideas = []
+    for i in range(number_new_ideas):
+        tem_new_idea = []
+        for di in range(dim):  # choose item randomly
+            tem_new_idea.append(choice(background[di]))
+        potential_new_ideas.append({'idea': tem_new_idea})
+
+    selected_idea = potential_new_ideas[0]
+    for i in potential_new_ideas:
+        if Individual_utility(agent, i) > Individual_utility(agent, selected_idea):
+            selected_idea = i
+    new_idea = {'idea': selected_idea['idea'], 'comment': [], 'like': [], 'iteration': iteration}
+
+    personal_idea_pool = node['agent'].idea_pool
+    pure_personal_idea = [i['idea'] for i in personal_idea_pool]
+    pure_visible_idea = [i['idea'] for i in visible_ideas]
+
+    if (new_idea['idea'] not in pure_personal_idea) and (new_idea['idea'] not in pure_visible_idea)\
+            and (random() <= Probability_accept(node, new_idea)):
+        node['agent'].idea_pool.append(new_idea)
+        print("new")
+    else:
+        return
+
+def Post_revised_idea(node, iteration):
+    agent = node['agent']
+    personal_idea_pool = node['agent'].idea_pool
+    pure_personal_ideas = [i['idea'] for i in personal_idea_pool]
+    potential_ideas = []
+    for i in visible_ideas:
+        if i['idea'] not in pure_personal_ideas:
+            potential_ideas.append(i)
+
+    if len(potential_ideas) != 0:  # revise an idea that is randomly selected
+        selected_idea = potential_ideas[choice(len(potential_ideas))]
+        selected_pure_idea = selected_idea['idea']
+
+        potential_new_ideas = []
+        for i in range(number_new_ideas):
+            tem_new_idea = selected_pure_idea[:]
+            background = agent.background
+            size_background = sum([len(i) for i in background])
+            selected_dim = choice(list(arange(dim)), p=[(len(i) + 10 ** -10) / size_background for i in background])
+            modified_item = Best_idea(agent)['idea'][selected_dim]
+            tem_new_idea[selected_dim] = modified_item
+            tem_new_idea_dic = {'idea': tem_new_idea}
+            potential_new_ideas.append(tem_new_idea_dic)
+
+        selected_idea = potential_new_ideas[0]
+        for i in potential_new_ideas:
+            if Individual_utility(agent, i) > Individual_utility(agent, selected_idea):
+                selected_idea = i
+        new_idea = {'idea': selected_idea['idea'], 'comment': [], 'like': [], 'iteration': iteration}
+
+        personal_idea_pool = node['agent'].idea_pool
+        pure_personal_idea = [i['idea'] for i in personal_idea_pool]
+        pure_visible_idea = [i['idea'] for i in visible_ideas]
+        pure_new_idea = new_idea['idea']
+
+        if (pure_new_idea not in pure_personal_idea) and (pure_new_idea not in pure_visible_idea):
+            #and (random() <= Probability_accept(node, new_idea)):
+            node['agent'].idea_pool.append(new_idea)
+            print("revised")
+        else:
+            return
+    else:
+        return
